@@ -1,0 +1,5 @@
+*
+!posts/
+!posts/**/
+!posts/**/*.png
+!posts/**/index.html
