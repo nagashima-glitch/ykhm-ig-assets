@@ -2,4 +2,5 @@
 !posts/
 !posts/**/
 !posts/**/*.png
+!posts/**/*.mp4
 !posts/**/index.html
