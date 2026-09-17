@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-board</title>
+<style>
+  :root {
+    --bg: #f4f7fd; --panel: #ffffff; --panel-2: #f8fafc; --ink: #14203a; --muted: #64748b;
+    --line: #e2e8f0; --accent: #3b6ef6; --accent-soft: #e8efff;
+    --doing: #3b6ef6; --needs_you: #e08a2b; --agent: #7c5cf0; --hold: #64748b; --done: #12a06a;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1220; --panel: #151c2e; --panel-2: #1b2438; --ink: #e8edf8; --muted: #94a3b8;
+      --line: #27324a; --accent: #6b93ff; --accent-soft: #1e2b4d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1220; --panel: #151c2e; --panel-2: #1b2438; --ink: #e8edf8; --muted: #94a3b8;
+    --line: #27324a; --accent: #6b93ff; --accent-soft: #1e2b4d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif;
+    font-size: 14px; line-height: 1.6;
+  }
+  header {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    padding: 14px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 5;
+  }
+  .brand { font-weight: 700; font-size: 17px; letter-spacing: .02em; }
+  .brand small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+  input, select, textarea, button { font: inherit; color: inherit; }
+  input[type="text"], input[type="search"], select, textarea {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  #q { flex: 1; min-width: 180px; }
+  button {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px;
+    padding: 7px 12px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .grid {
+    display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr));
+    gap: 14px; padding: 16px; align-items: start;
+  }
+  .col { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+  .col.drop { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .col h2 { margin: 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .col h2 .count {
+    margin-left: auto; font-size: 12px; color: var(--muted);
+    background: var(--panel-2); border-radius: 999px; padding: 1px 9px;
+  }
+  .col .hint { color: var(--muted); font-size: 11px; margin: 2px 0 10px; }
+  .card {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 11px; margin-bottom: 10px; cursor: grab;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .who {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; background: var(--panel);
+  }
+  .card .who i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; font-style: normal; }
+  .card h3 { margin: 8px 0 4px; font-size: 14px; }
+  .card p { margin: 0; color: var(--muted); font-size: 12px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 11px; color: var(--muted); }
+  .tag { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 0 6px; }
+  .bar { height: 5px; border-radius: 999px; background: var(--line); margin-top: 8px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--accent); }
+  .dot-doing { color: var(--doing); } .dot-needs_you { color: var(--needs_you); }
+  .dot-agent { color: var(--agent); } .dot-hold { color: var(--hold); } .dot-done { color: var(--done); }
+  dialog {
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); color: var(--ink);
+    width: min(560px, 92vw); padding: 0;
+  }
+  dialog::backdrop { background: rgba(10, 16, 32, .5); }
+  .dlg-body { padding: 16px; display: grid; gap: 10px; }
+  .dlg-body h2 { margin: 0; font-size: 16px; }
+  .row { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; }
+  .notes { max-height: 210px; overflow: auto; display: grid; gap: 8px; }
+  .note { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+  .note b { color: var(--muted); font-weight: 600; }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  footer { padding: 4px 16px 20px; color: var(--muted); font-size: 12px; }
+  .empty { color: var(--muted); font-size: 12px; padding: 6px 2px; }
+  @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">agent-board<small>Claude Code と Codex が同じタスクを見る</small></div>
+  <input id="q" type="search" placeholder="タイトル・メモ・タグで検索...">
+  <select id="owner">
+    <option value="">担当: すべて</option>
+    <option value="claude-code">claude-code</option>
+    <option value="codex">codex</option>
+    <option value="you">あなた</option>
+  </select>
+  <button id="theme" title="表示を切り替え">◐</button>
+  <button id="reload">更新</button>
+  <button class="primary" id="new">+ タスクを追加</button>
+</header>
+
+<main class="grid" id="grid"></main>
+<footer id="foot"></footer>
+
+<dialog id="dlg"><form method="dialog" class="dlg-body" id="form"></form></dialog>
+
+<script>
+const OWNER_LABEL = { 'claude-code': 'claude-code', codex: 'codex', you: 'あなた', both: '両方', other: 'その他' };
+let state = { columns: [], tasks: [], owners: [], file: '' };
+
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function api(path, method = 'GET', body) {
+  const res = await fetch(path, {
+    method,
+    headers: body ? { 'content-type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'request failed');
+  return data;
+}
+
+async function refresh() {
+  state = await api('/api/state');
+  render();
+}
+
+function visible() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const owner = document.getElementById('owner').value;
+  return state.tasks.filter((t) => {
+    if (owner && t.owner !== owner && t.owner !== 'both') return false;
+    if (!q) return true;
+    const hay = [t.title, t.body, t.project, (t.tags || []).join(' '),
+      (t.notes || []).map((n) => n.text).join(' ')].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function cardHtml(t) {
+  const tags = (t.tags || []).map((tag) => `<span class="tag">#${esc(tag)}</span>`).join('');
+  const bar = (t.progress ?? null) === null ? ''
+    : `<div class="bar"><span style="width:${t.progress}%"></span></div>`;
+  return `<article class="card" draggable="true" data-id="${t.id}">
+    <span class="who dot-${t.status}"><i></i>${esc(OWNER_LABEL[t.owner] ?? t.owner)}</span>
+    <h3>${esc(t.title)}</h3>
+    ${t.body ? `<p>${esc(t.body.split('\n')[0])}</p>` : ''}
+    <div class="meta">${tags}
+      ${t.project ? `<span class="tag">${esc(t.project)}</span>` : ''}
+      ${t.due ? `<span>期限 ${esc(t.due)}</span>` : ''}
+      ${(t.notes || []).length ? `<span>付箋 ${t.notes.length}</span>` : ''}
+    </div>${bar}
+  </article>`;
+}
+
+function render() {
+  const tasks = visible();
+  document.getElementById('grid').innerHTML = state.columns.map((col) => {
+    const items = tasks.filter((t) => t.status === col.id);
+    return `<section class="col" data-status="${col.id}">
+      <h2><span class="who dot-${col.id}"><i></i></span>${esc(col.title)}<span class="count">${items.length}</span></h2>
+      <div class="hint">${esc(col.hint || '')}</div>
+      ${items.map(cardHtml).join('') || '<div class="empty">なし</div>'}
+    </section>`;
+  }).join('');
+  document.getElementById('foot').textContent =
+    `${state.columns.length} 列・${state.tasks.length} 件 / データ: ${state.file}`;
+  wire();
+}
+
+function wire() {
+  for (const card of document.querySelectorAll('.card')) {
+    card.addEventListener('click', () => openTask(card.dataset.id));
+    card.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', card.dataset.id));
+  }
+  for (const col of document.querySelectorAll('.col')) {
+    col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('drop'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drop'));
+    col.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      col.classList.remove('drop');
+      const id = e.dataTransfer.getData('text/plain');
+      await api(`/api/tasks/${id}`, 'PATCH', { status: col.dataset.status });
+      refresh();
+    });
+  }
+}
+
+function field(label, inner) {
+  return `<div class="row"><label>${label}</label>${inner}</div>`;
+}
+
+function openTask(id) {
+  const t = state.tasks.find((x) => x.id === id);
+  if (!t) return;
+  const statusOptions = state.columns
+    .map((c) => `<option value="${c.id}"${c.id === t.status ? ' selected' : ''}>${esc(c.title)}</option>`).join('');
+  const ownerOptions = state.owners
+    .map((o) => `<option value="${o}"${o === t.owner ? ' selected' : ''}>${esc(OWNER_LABEL[o] ?? o)}</option>`).join('');
+  const notes = (t.notes || []).map((n) =>
+    `<div class="note"><b>${esc(OWNER_LABEL[n.by] ?? n.by)} · ${esc(n.at.replace('T', ' ').slice(0, 16))}</b><br>${esc(n.text)}</div>`
+  ).join('') || '<div class="empty">まだ付箋はありません</div>';
+
+  const form = document.getElementById('form');
+  form.innerHTML = `
+    <h2>タスク</h2>
+    ${field('タイトル', `<input type="text" name="title" value="${esc(t.title)}">`)}
+    ${field('内容', `<textarea name="body" rows="3">${esc(t.body)}</textarea>`)}
+    ${field('状態', `<select name="status">${statusOptions}</select>`)}
+    ${field('担当', `<select name="owner">${ownerOptions}</select>`)}
+    ${field('プロジェクト', `<input type="text" name="project" value="${esc(t.project)}">`)}
+    ${field('タグ', `<input type="text" name="tags" value="${esc((t.tags || []).join(', '))}" placeholder="カンマ区切り">`)}
+    ${field('進捗 %', `<input type="text" name="progress" value="${t.progress ?? ''}">`)}
+    ${field('期限', `<input type="text" name="due" value="${esc(t.due)}" placeholder="2026-09-18 14:00">`)}
+    <h2>付箋（引き継ぎメモ）</h2>
+    <div class="notes">${notes}</div>
+    ${field('追加', `<input type="text" name="note" placeholder="次に作業するAIが読める内容で">`)}
+    <div class="actions">
+      <button value="cancel">閉じる</button>
+      <button value="delete">削除</button>
+      <button class="primary" value="save">保存</button>
+    </div>
+    <div class="empty">id: ${esc(t.id)}</div>`;
+
+  const dlg = document.getElementById('dlg');
+  dlg.returnValue = 'cancel';
+  dlg.showModal();
+  dlg.onclose = async () => {
+    const data = Object.fromEntries(new FormData(form));
+    try {
+      if (dlg.returnValue === 'delete') {
+        if (confirm('このタスクを削除しますか？')) await api(`/api/tasks/${t.id}`, 'DELETE');
+      } else if (dlg.returnValue === 'save') {
+        await api(`/api/tasks/${t.id}`, 'PATCH', {
+          title: data.title, body: data.body, status: data.status, owner: data.owner,
+          project: data.project, due: data.due,
+          progress: data.progress === '' ? null : Number(data.progress),
+          tags: data.tags.split(',').map((s) => s.trim()).filter(Boolean),
+        });
+        if (data.note.trim()) await api(`/api/tasks/${t.id}/notes`, 'POST', { text: data.note, by: 'you' });
+      }
+    } catch (err) { alert(err.message); }
+    refresh();
+  };
+}
+
+function openNew() {
+  const statusOptions = state.columns.map((c) => `<option value="${c.id}">${esc(c.title)}</option>`).join('');
+  const ownerOptions = state.owners.map((o) => `<option value="${o}">${esc(OWNER_LABEL[o] ?? o)}</option>`).join('');
+  const form = document.getElementById('form');
+  form.innerHTML = `
+    <h2>タスクを追加</h2>
+    ${field('タイトル', '<input type="text" name="title" required>')}
+    ${field('内容', '<textarea name="body" rows="3"></textarea>')}
+    ${field('状態', `<select name="status">${statusOptions}</select>`)}
+    ${field('担当', `<select name="owner">${ownerOptions}</select>`)}
+    ${field('プロジェクト', '<input type="text" name="project">')}
+    ${field('タグ', '<input type="text" name="tags" placeholder="カンマ区切り">')}
+    <div class="actions">
+      <button value="cancel">やめる</button>
+      <button class="primary" value="save">追加</button>
+    </div>`;
+  const dlg = document.getElementById('dlg');
+  dlg.returnValue = 'cancel';
+  dlg.showModal();
+  dlg.onclose = async () => {
+    if (dlg.returnValue !== 'save') return;
+    const data = Object.fromEntries(new FormData(form));
+    if (!data.title.trim()) return;
+    try {
+      await api('/api/tasks', 'POST', {
+        title: data.title, body: data.body, status: data.status, owner: data.owner,
+        project: data.project, tags: data.tags.split(',').map((s) => s.trim()).filter(Boolean),
+      });
+    } catch (err) { alert(err.message); }
+    refresh();
+  };
+}
+
+document.getElementById('q').addEventListener('input', render);
+document.getElementById('owner').addEventListener('change', render);
+document.getElementById('reload').addEventListener('click', refresh);
+document.getElementById('new').addEventListener('click', openNew);
+document.getElementById('theme').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme === 'dark'
+    || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+});
+
+refresh();
+setInterval(refresh, 5000); // 別のAIが書き換えたら自動で反映される
+</script>
+</body>
+</html>

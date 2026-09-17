@@ -4,3 +4,12 @@
 !posts/**/*.png
 !posts/**/*.mp4
 !posts/**/index.html
+
+# Claude Code / Codex 共有のタスクボード
+!agent-board/
+!agent-board/**
+agent-board/tasks.json.lock/
+agent-board/tasks.json.tmp-*
+!.mcp.json
+!AGENTS.md
+!CLAUDE.md

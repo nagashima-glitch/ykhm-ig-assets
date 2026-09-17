@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-17T13:49:02.554Z",
+  "tasks": [
+    {
+      "id": "t_mu5l3x9xs5e",
+      "title": "9/18 の投稿アセットを作る",
+      "body": "posts/2026-09-18/ にスライドを用意する。",
+      "status": "doing",
+      "owner": "claude-code",
+      "project": "ykhm-ig",
+      "tags": [
+        "投稿"
+      ],
+      "progress": 40,
+      "due": "",
+      "notes": [
+        {
+          "at": "2026-09-17T13:47:46.270Z",
+          "by": "claude-code",
+          "text": "構成は5枚で確定。次はスライド3枚目以降の文言。"
+        }
+      ],
+      "createdAt": "2026-09-17T13:47:46.101Z",
+      "updatedAt": "2026-09-17T13:49:02.554Z"
+    },
+    {
+      "id": "t_mu5l3xgsfvb",
+      "title": "英語版の説明文を公開してよいか確認",
+      "body": "この文面で出してよいか、あなたの判断がほしい。",
+      "status": "needs_you",
+      "owner": "codex",
+      "project": "ykhm-ig",
+      "tags": [
+        "確認"
+      ],
+      "progress": null,
+      "due": "",
+      "notes": [],
+      "createdAt": "2026-09-17T13:47:46.348Z",
+      "updatedAt": "2026-09-17T13:47:46.348Z"
+    },
+    {
+      "id": "t_mu5l3xj42ws",
+      "title": "posts/ のサムネ生成を自動化",
+      "body": "",
+      "status": "agent",
+      "owner": "codex",
+      "project": "tooling",
+      "tags": [
+        "自動化"
+      ],
+      "progress": 70,
+      "due": "",
+      "notes": [],
+      "createdAt": "2026-09-17T13:47:46.432Z",
+      "updatedAt": "2026-09-17T13:47:46.433Z"
+    },
+    {
+      "id": "t_mu5l3xloguv",
+      "title": "予約導線の見直し",
+      "body": "",
+      "status": "hold",
+      "owner": "you",
+      "project": "ykhm-ig",
+      "tags": [],
+      "progress": null,
+      "due": "",
+      "notes": [],
+      "createdAt": "2026-09-17T13:47:46.524Z",
+      "updatedAt": "2026-09-17T13:47:46.524Z"
+    },
+    {
+      "id": "t_mu5l3xo0jh7",
+      "title": "9/13 リールを公開",
+      "body": "",
+      "status": "done",
+      "owner": "claude-code",
+      "project": "ykhm-ig",
+      "tags": [],
+      "progress": null,
+      "due": "",
+      "notes": [],
+      "createdAt": "2026-09-17T13:47:46.608Z",
+      "updatedAt": "2026-09-17T13:47:46.609Z"
+    }
+  ]
+}

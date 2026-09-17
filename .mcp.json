@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "agent-board": {
+      "command": "node",
+      "args": ["agent-board/mcp-server.mjs"],
+      "env": { "AGENT_BOARD_AGENT": "claude-code" }
+    }
+  }
+}
