@@ -4,3 +4,8 @@
 !posts/**/*.png
 !posts/**/*.mp4
 !posts/**/index.html
+!.gitignore
+!AGENTS.md
+!CLAUDE.md
+!docs/
+!docs/**
