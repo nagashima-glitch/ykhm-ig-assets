@@ -1,0 +1,35 @@
+# ~/.codex/config.toml に追記して使う雛形。
+# モデル名は codex 内で /model を叩き、実在する名前に置き換えること。
+
+# --- 既定値（迷ったらここ） ---
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# --- deep: HP の改築・設計変更・原因不明のバグ ---
+[profiles.deep]
+model = "gpt-6-astra"
+model_reasoning_effort = "high"      # minimal / low / medium / high / xhigh
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# --- fast: 文言修正・一括置換・定型作業 ---
+[profiles.fast]
+model = "gpt-5.4-mini"
+model_reasoning_effort = "low"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# --- review: 差分を読むだけ。書き込ませない ---
+[profiles.review]
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
+approval_policy = "never"
+sandbox_mode = "read-only"
+
+# 使い方:
+#   codex --profile deep      重い作業
+#   codex --profile fast      軽い作業
+#   codex --profile review    レビューのみ
+#   codex -c model_reasoning_effort="xhigh"   その場限りの引き上げ
